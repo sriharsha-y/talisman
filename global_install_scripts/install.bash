@@ -87,7 +87,7 @@ function run() {
 		ARCHITECTURE="linux"
 	elif [ "$OS" == "darwin" ]; then
 		ARCHITECTURE="darwin"
-	elif [ "$OS" == *"MINGW32"* ] || [ "$OS" == *"MINGW64"* ]; then
+	elif [[ "$OS" == *"MINGW32"* ]] || [[ "$OS" == *"MINGW64"* ]]; then
 		ARCHITECTURE="windows"
 	else
 		echo_error $OS
