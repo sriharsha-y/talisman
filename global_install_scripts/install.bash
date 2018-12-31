@@ -90,7 +90,6 @@ function run() {
 	elif [[ "$OS" == *"MINGW32_NT"* ]] || [[ "$OS" == *"MINGW64_NT"* ]]; then
 		ARCHITECTURE="windows"
 	else
-		echo_error $OS
 		echo_error "Talisman currently only supports Windows, Linux and MacOS(darwin) systems."
 		echo_error "If this is a problem for you, please open an issue: https://github.com/${INSTALL_ORG_REPO}/issues/new"
 		exit $E_UNSUPPORTED_ARCH
@@ -161,6 +160,7 @@ function run() {
 	curl --silent "${SCRIPT_BASE}/talisman_hook_script.bash" > ${TEMP_DIR}/talisman_hook_script.bash
 	curl --silent "${SCRIPT_BASE}/setup_talisman_hook_in_repo.bash" > ${REPO_HOOK_SETUP_SCRIPT_PATH}
 	chmod +x ${REPO_HOOK_SETUP_SCRIPT_PATH}
+	echo_debug "${TEMP_DIR}"
 	echo_debug "Contents of temp_dir: `ls ${TEMP_DIR}`" 
     }
 
