@@ -90,6 +90,7 @@ function run() {
 	elif [ "$OS" == *"MINGW32"* ] || [ "$OS" == *"MINGW64"* ]; then
 		ARCHITECTURE="windows"
 	else
+		echo_error $OS
 		echo_error "Talisman currently only supports Windows, Linux and MacOS(darwin) systems."
 		echo_error "If this is a problem for you, please open an issue: https://github.com/${INSTALL_ORG_REPO}/issues/new"
 		exit $E_UNSUPPORTED_ARCH
