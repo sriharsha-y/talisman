@@ -125,7 +125,7 @@ function run() {
     	esac
 	
 	TALISMAN_BINARY_NAME="talisman_${ARCHITECTURE}"
-	if [[ "$OS" == "MINGW32_NT-10.0-WOW" || "$OS" == "MINGW64_NT-10.0" ]]; then
+	if [[ "$OS" == *"MINGW32_NT"* ]] || [[ "$OS" == *"MINGW64_NT"* ]]; then
 		TALISMAN_BINARY_NAME="${TALISMAN_BINARY_NAME}.exe"
 	fi
     }
