@@ -35,7 +35,7 @@ function run() {
     
     IFS=$'\n'
     VERSION=${VERSION:-'latest'}
-    INSTALL_ORG_REPO=${INSTALL_ORG_REPO:-'thoughtworks/talisman'}
+    INSTALL_ORG_REPO=${INSTALL_ORG_REPO:-'sriharsha-y/talisman'}
 
     DEFAULT_GLOBAL_TEMPLATE_DIR="$HOME/.git-template"  # create git-template dir here if not already setup 
     TALISMAN_SETUP_DIR=${HOME}/.talisman/bin           # location of central install: talisman binary and hook script
@@ -83,21 +83,32 @@ function run() {
 	# based on OS (linux/darwin) and ARCH(32/64 bit)
 	declare ARCHITECTURE
 	OS=$(uname -s)
-	case $OS in
-	    "Linux")
-		ARCHITECTURE="linux" ;;
-	    "Darwin")
-		ARCHITECTURE="darwin" ;;
-		"MINGW32_NT-10.0-WOW")
-		ARCHITECTURE="windows" ;;
-		"MINGW64_NT-10.0")
-		ARCHITECTURE="windows" ;;
-		*)
+	if [ "$OS" == "Linux" ]; then
+		ARCHITECTURE="linux"
+	elif [ "$OS" == "darwin" ]; then
+		ARCHITECTURE="darwin"
+	elif [ "$OS" == *"MINGW32"* ] || [ "$OS" == *"MINGW64"* ]; then
+		ARCHITECTURE="windows"
+	else
 		echo_error "Talisman currently only supports Windows, Linux and MacOS(darwin) systems."
 		echo_error "If this is a problem for you, please open an issue: https://github.com/${INSTALL_ORG_REPO}/issues/new"
 		exit $E_UNSUPPORTED_ARCH
-		;;
-	esac
+	fi
+	# case $OS in
+	#     "Linux")
+	# 	ARCHITECTURE="linux" ;;
+	#     "Darwin")
+	# 	ARCHITECTURE="darwin" ;;
+	# 	"MINGW32_NT-10.0-WOW")
+	# 	ARCHITECTURE="windows" ;;
+	# 	"MINGW64_NT-10.0")
+	# 	ARCHITECTURE="windows" ;;
+	# 	*)
+	# 	echo_error "Talisman currently only supports Windows, Linux and MacOS(darwin) systems."
+	# 	echo_error "If this is a problem for you, please open an issue: https://github.com/${INSTALL_ORG_REPO}/issues/new"
+	# 	exit $E_UNSUPPORTED_ARCH
+	# 	;;
+	# esac
 	
 	ARCH=$(uname -m)
 	case $ARCH in
