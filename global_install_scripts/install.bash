@@ -2,7 +2,7 @@
 set -euo pipefail
 shopt -s extglob
 
-DEBUG=${DEBUG:-''}
+DEBUG=${DEBUG:-'1'}
 FORCE_DOWNLOAD=${FORCE_DOWNLOAD:-''}
 
 # default is a pre-commit hook; if "pre-push" is the first arg to the script, then it sets up as pre-push
@@ -87,7 +87,7 @@ function run() {
 		ARCHITECTURE="linux"
 	elif [ "$OS" == "darwin" ]; then
 		ARCHITECTURE="darwin"
-	elif [[ "$OS" == *"MINGW32"* ]] || [[ "$OS" == *"MINGW64"* ]]; then
+	elif [[ "$OS" == *"MINGW32_NT"* ]] || [[ "$OS" == *"MINGW64_NT"* ]]; then
 		ARCHITECTURE="windows"
 	else
 		echo_error $OS
