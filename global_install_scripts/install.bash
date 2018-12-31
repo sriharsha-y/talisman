@@ -41,7 +41,7 @@ function run() {
     TALISMAN_SETUP_DIR=${HOME}/.talisman/bin           # location of central install: talisman binary and hook script
     TALISMAN_HOOK_SCRIPT_PATH=${TALISMAN_SETUP_DIR}/talisman_hook_script
     SCRIPT_ORG_REPO=${SCRIPT_ORG_REPO:-$INSTALL_ORG_REPO}
-    SCRIPT_BASE="https://raw.githubusercontent.com/${SCRIPT_ORG_REPO}/master/global_install_scripts"
+    SCRIPT_BASE="https://raw.githubusercontent.com/${SCRIPT_ORG_REPO}/windows/global_install_scripts"
 
     TEMP_DIR=$(mktemp -d 2>/dev/null || mktemp -d -t 'talisman_setup')
     trap "rm -r ${TEMP_DIR}" EXIT
@@ -72,6 +72,7 @@ function run() {
     export -f echo_success
     
     function collect_version_artifact_download_urls() {
+	echo_debug "Test"
 	curl --silent "https://api.github.com/repos/${INSTALL_ORG_REPO}/releases/${VERSION}" | 
 	    grep -e browser_download_url | grep -o 'https.*' | tr -d '"' > ${TEMP_DIR}/download_urls
 	echo_debug "All release artifact download urls can be found at ${TEMP_DIR}/download_urls:"
@@ -160,7 +161,6 @@ function run() {
 	curl --silent "${SCRIPT_BASE}/talisman_hook_script.bash" > ${TEMP_DIR}/talisman_hook_script.bash
 	curl --silent "${SCRIPT_BASE}/setup_talisman_hook_in_repo.bash" > ${REPO_HOOK_SETUP_SCRIPT_PATH}
 	chmod +x ${REPO_HOOK_SETUP_SCRIPT_PATH}
-	echo_debug "${TEMP_DIR}"
 	echo_debug "Contents of temp_dir: `ls ${TEMP_DIR}`" 
     }
 
