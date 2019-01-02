@@ -72,7 +72,6 @@ function run() {
     export -f echo_success
     
     function collect_version_artifact_download_urls() {
-	echo_debug "Test"
 	curl --silent "https://api.github.com/repos/${INSTALL_ORG_REPO}/releases/${VERSION}" | 
 	    grep -e browser_download_url | grep -o 'https.*' | tr -d '"' > ${TEMP_DIR}/download_urls
 	echo_debug "All release artifact download urls can be found at ${TEMP_DIR}/download_urls:"
@@ -95,21 +94,6 @@ function run() {
 		echo_error "If this is a problem for you, please open an issue: https://github.com/${INSTALL_ORG_REPO}/issues/new"
 		exit $E_UNSUPPORTED_ARCH
 	fi
-	# case $OS in
-	#     "Linux")
-	# 	ARCHITECTURE="linux" ;;
-	#     "Darwin")
-	# 	ARCHITECTURE="darwin" ;;
-	# 	"MINGW32_NT-10.0-WOW")
-	# 	ARCHITECTURE="windows" ;;
-	# 	"MINGW64_NT-10.0")
-	# 	ARCHITECTURE="windows" ;;
-	# 	*)
-	# 	echo_error "Talisman currently only supports Windows, Linux and MacOS(darwin) systems."
-	# 	echo_error "If this is a problem for you, please open an issue: https://github.com/${INSTALL_ORG_REPO}/issues/new"
-	# 	exit $E_UNSUPPORTED_ARCH
-	# 	;;
-	# esac
 	
 	ARCH=$(uname -m)
 	case $ARCH in
