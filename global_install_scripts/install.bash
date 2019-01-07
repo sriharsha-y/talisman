@@ -85,7 +85,7 @@ function run() {
 	OS=$(uname -s)
 	if [ "$OS" == "Linux" ]; then
 		ARCHITECTURE="linux"
-	elif [ "$OS" == "darwin" ]; then
+	elif [ "$OS" == "Darwin" ]; then
 		ARCHITECTURE="darwin"
 	elif [[ "$OS" == *"MINGW32_NT"* ]] || [[ "$OS" == *"MINGW64_NT"* ]]; then
 		ARCHITECTURE="windows"
