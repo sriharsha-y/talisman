@@ -33,7 +33,15 @@ func (r *Runner) RunWithoutErrors() int {
 	return r.exitStatus()
 }
 
-
+//RunChecksumCalculator runs the checksum calculator against the patterns given as input
+func (r *Runner) RunChecksumCalculator(fileNamePatterns []string) int {
+	checksumCalculator := detector.NewChecksumCalculator()
+	rcSuggestion := checksumCalculator.SuggestTalismanRCForPatterns(fileNamePatterns)
+	if rcSuggestion != "" {
+		fmt.Print(rcSuggestion)
+	}
+	return 0
+}
 
 func (r *Runner) doRun() {
 	ignoresNew := detector.ReadConfigFromRCFile(readRepoFile())

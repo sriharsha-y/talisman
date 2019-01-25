@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"talisman/git_repo"
+	"talisman/utilities"
 
 	"github.com/olekukonko/tablewriter"
 	yaml "gopkg.in/yaml.v2"
@@ -83,10 +84,8 @@ func (r *DetectionResults) Report() string {
 	}
 	for filePath := range r.ignores {
 		filePathsForIgnoresAndFailures = append(filePathsForIgnoresAndFailures, string(filePath))
-		// ignoreData := r.ReportFileIgnores(filePath)
-		// data = append(data, ignoreData...)
 	}
-	filePathsForIgnoresAndFailures = unique(filePathsForIgnoresAndFailures)
+	filePathsForIgnoresAndFailures = utilities.UniqueItems(filePathsForIgnoresAndFailures)
 	if len(r.failures) > 0 {
 		fmt.Printf("\n\x1b[1m\x1b[31mTalisman Report:\x1b[0m\x1b[0m\n")
 		table.AppendBulk(data)
@@ -101,7 +100,7 @@ func (r *DetectionResults) Report() string {
 func (r *DetectionResults) suggestTalismanRC(filePaths []string) string {
 	var fileIgnoreConfigs []FileIgnoreConfig
 	for _, filePath := range filePaths {
-		currentChecksum := CalculateCollectiveHash([]string{filePath})
+		currentChecksum := utilities.CalculateCollectiveChecksum([]string{filePath})
 		fileIgnoreConfig := FileIgnoreConfig{filePath, currentChecksum, []string{}}
 		fileIgnoreConfigs = append(fileIgnoreConfigs, fileIgnoreConfig)
 	}
@@ -137,16 +136,4 @@ func keys(aMap map[git_repo.FilePath][]string) []git_repo.FilePath {
 		result = append(result, filePath)
 	}
 	return result
-}
-
-func unique(stringSlice []string) []string {
-	keys := make(map[string]bool)
-	list := []string{}
-	for _, entry := range stringSlice {
-		if _, value := keys[entry]; !value {
-			keys[entry] = true
-			list = append(list, entry)
-		}
-	}
-	return list
 }

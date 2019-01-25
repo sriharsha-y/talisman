@@ -1,62 +1,78 @@
 package detector
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
-	"io/ioutil"
+	"fmt"
+	"os"
 	"talisman/git_repo"
+	"talisman/utilities"
+
+	yaml "gopkg.in/yaml.v2"
 )
 
+//ChecksumCalculator represents a calculator for checksum
 type ChecksumCalculator struct{}
 
-//NewChecksumCalculator returns new instance of the CheckSumDetector
+//NewChecksumCalculator returns new instance of the ChecksumCompare
 func NewChecksumCalculator() *ChecksumCalculator {
 	cs := ChecksumCalculator{}
 	return &cs
 }
 
 //FilterIgnoresBasedOnChecksums filters the file ignores from the TalismanRCIgnore which doesn't have any checksum value or having mismatched checksum value from the .talsimanrc
-func (cs *ChecksumCalculator) FilterIgnoresBasedOnChecksums(additions []git_repo.Addition, ignoreConfig TalismanRCIgnore) TalismanRCIgnore {
-	fileIgnores := []FileIgnoreConfig{}
+func (cc *ChecksumCalculator) FilterIgnoresBasedOnChecksums(additions []git_repo.Addition, ignoreConfig TalismanRCIgnore) TalismanRCIgnore {
+	finalIgnores := []FileIgnoreConfig{}
+	wd, _ := os.Getwd()
+	repo := git_repo.RepoLocatedAt(wd)
+	gitTrackedFilesAsAdditions := repo.TrackedFilesAsAdditions()
+	gitTrackedFilesAsAdditions = append(gitTrackedFilesAsAdditions, additions...)
 	for _, ignore := range ignoreConfig.FileIgnoreConfig {
-		var patternpaths []string
-		for _, addition := range additions {
-			if addition.Matches(ignore.FileName) {
-				patternpaths = append(patternpaths, string(addition.Path))
-			}
-		}
-		// Calculate current checksum
-		currentChecksum := CalculateCollectiveHash(patternpaths)
+		currentCollectiveChecksum := cc.calculateCollectiveChecksumForIgnore(ignore.FileName, gitTrackedFilesAsAdditions)
 		// Compare with previous checksum from FileIgnoreConfig
-		if ignore.Checksum == currentChecksum {
-			fileIgnores = append(fileIgnores, ignore)
+		if ignore.Checksum == currentCollectiveChecksum {
+			finalIgnores = append(finalIgnores, ignore)
 		}
 	}
 	rc := TalismanRCIgnore{}
-	rc.FileIgnoreConfig = fileIgnores
+	rc.FileIgnoreConfig = finalIgnores
 	return rc
 }
 
-func hashByte(contentPtr *[]byte) string {
-	contents := *contentPtr
-	hasher := sha256.New()
-	hasher.Write(contents)
-	return hex.EncodeToString(hasher.Sum(nil))
+//SuggestTalismanRCForPatterns returns .talismanrc format suggestion with respective checksums for input patterns
+func (cc *ChecksumCalculator) SuggestTalismanRCForPatterns(fileNamePatterns []string) string {
+	wd, _ := os.Getwd()
+	repo := git_repo.RepoLocatedAt(wd)
+	gitTrackedFilesAsAdditions := repo.TrackedFilesAsAdditions()
+	gitTrackedFilesAsAdditions = append(gitTrackedFilesAsAdditions, repo.StagedAdditions()...)
+	var fileIgnoreConfigs []FileIgnoreConfig
+	for _, pattern := range fileNamePatterns {
+		collectiveChecksum := cc.calculateCollectiveChecksumForIgnore(pattern, gitTrackedFilesAsAdditions)
+		if collectiveChecksum == "" {
+			continue
+		}
+		fileIgnoreConfig := FileIgnoreConfig{pattern, collectiveChecksum, []string{}}
+		fileIgnoreConfigs = append(fileIgnoreConfigs, fileIgnoreConfig)
+	}
+	if len(fileIgnoreConfigs) == 0 {
+		return ""
+	}
+	result := fmt.Sprintf("\n\x1b[33mFormat for .talismanrc for given file names:\x1b[0m\n")
+	talismanRcIgnoreConfig := TalismanRCIgnore{fileIgnoreConfigs}
+	m, _ := yaml.Marshal(&talismanRcIgnoreConfig)
+	return result + string(m)
 }
 
-//CalculateCollectiveHash returns collective hash of the paths passed as argument
-func CalculateCollectiveHash(paths []string) string {
-	var finHash = ""
-	for _, path := range paths {
-		sbyte := []byte(finHash)
-		concatBytes := hashByte(&sbyte)
-		nameByte := []byte(path)
-		nameHash := hashByte(&nameByte)
-		fileBytes, _ := ioutil.ReadFile(path)
-		fileHash := hashByte(&fileBytes)
-		finHash = concatBytes + fileHash + nameHash
+func (cc *ChecksumCalculator) calculateCollectiveChecksumForIgnore(fileNamePattern string, additions []git_repo.Addition) string {
+	var patternpaths []string
+	for _, addition := range additions {
+		if addition.Matches(fileNamePattern) {
+			patternpaths = append(patternpaths, string(addition.Path))
+		}
 	}
-	c := []byte(finHash)
-	m := hashByte(&c)
-	return m
+	// Calculate current collective checksum
+	patternpaths = utilities.UniqueItems(patternpaths)
+	if len(patternpaths) == 0 {
+		return ""
+	}
+	currentCollectiveChecksum := utilities.CalculateCollectiveChecksum(patternpaths)
+	return currentCollectiveChecksum
 }

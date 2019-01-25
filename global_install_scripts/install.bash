@@ -222,11 +222,13 @@ function run() {
     #   user can opt out of auto-setup of TALISMAN_HOME to set it up later manually
     TALISMAN_SETUP_DIR="$1"
     echo "Setting up TALISMAN_HOME in path"
-
+	
     if [ -n "${TALISMAN_HOME:-}" ]; then
         echo -e "TALISMAN_HOME is already set\n"
-        return 0;
+        return 0
     fi
+	
+	# [[ ! -z "${TALISMAN_HOME}" ]] || { echo -e "TALISMAN_HOME is already set\n"; return 0; }
 
     BASHRC_OPT="Set TALISMAN_HOME in ~/.bashrc"
     BASHPROFILE_OPT="Set TALISMAN_HOME in ~/.bash_profile"
@@ -263,11 +265,15 @@ function run() {
     function set_talisman_home_in() {
       ENV_FILE="$1"
       echo -e "Setting up TALISMAN_HOME in ${ENV_FILE}"
+	  echo "# >>> talisman >>>" >> ${ENV_FILE}
       echo "export TALISMAN_HOME=${TALISMAN_SETUP_DIR}" >> ${ENV_FILE}
+	  echo "alias talisman=\$TALISMAN_HOME/${TALISMAN_BINARY_NAME}" >> ${ENV_FILE}
+	  echo "# <<< talisman <<<" >> ${ENV_FILE}
       printf '\e[1;34m%-6s\e[m' "After the installation is complete, you will need to manually restart the terminal or source ${ENV_FILE} file"
       echo
       read -n 1 -s -r -p "Press any key to continue ..."
       echo
+	  source $ENV_FILE
     }
 
     function setup_git_talisman_hooks_at() {

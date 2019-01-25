@@ -101,6 +101,13 @@ function run() {
 	fi
     }
 
+	function remove_talisman_env_variables() {
+		FILE_PATH="$1"
+		if [ -f $FILE_PATH ]; then
+			sed -i '' '/# >>> talisman >>>/,/# <<< talisman <<</d' $FILE_PATH
+		fi
+	}
+
     get_dependent_scripts
     remove_git_talisman_hooks
 
@@ -117,9 +124,11 @@ function run() {
 	echo_success "Removed global talisman install from ${TALISMAN_SETUP_DIR}"
 
 	if [ -n "${TALISMAN_HOME:-}" ]; then
-        echo "Please remember to remove TALISMAN_HOME from your environment variables"
+		remove_talisman_env_variables ~/.bash_profile
+		remove_talisman_env_variables ~/.bashrc
+		remove_talisman_env_variables ~/.profile
+        echo "Please remember to remove TALISMAN_HOME from your environment variables if you have setup manually"
     fi
-
 }
 
 run $0 $@
