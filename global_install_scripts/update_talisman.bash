@@ -128,13 +128,33 @@ function run() {
 	chmod +x ${TALISMAN_SETUP_DIR}/${TALISMAN_BINARY_NAME}
     }
 
+	function set_talisman_env_variables_properly() {
+		FILE_PATH="$1"
+		if [ -f $FILE_PATH ] && grep -q "TALISMAN_HOME" $FILE_PATH; then
+			if ! grep -q ">>> talisman >>>" $FILE_PATH; then
+				sed -i '' '/TALISMAN_HOME/d' $FILE_PATH
+				echo "# >>> talisman >>>" >> $FILE_PATH
+				echo "# Kindly don't touch these environment variables" >> $FILE_PATH
+      			echo "export TALISMAN_HOME=${TALISMAN_SETUP_DIR}" >> $FILE_PATH
+	  			echo "alias talisman=\$TALISMAN_HOME/${TALISMAN_BINARY_NAME}" >> $FILE_PATH
+	  			echo "# <<< talisman <<<" >> $FILE_PATH
+			fi
+		fi
+	}
+
 	set_talisman_binary_name
     echo "Downloading latest talisman binary"
 	collect_version_artifact_download_urls
 	download_talisman_binary
 	echo "Replacing talisman binary"
     setup_talisman
-
-	}
+	# Correcting talisman env variables if they are not in proper format
+	if [ -n "${TALISMAN_HOME:-}" ]; then
+		set_talisman_env_variables_properly ~/.bashrc
+		set_talisman_env_variables_properly ~/.bash_profile
+		set_talisman_env_variables_properly ~/.profile
+        return 0
+    fi
+}
 
 run $0 $@

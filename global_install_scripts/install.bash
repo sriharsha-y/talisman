@@ -216,6 +216,20 @@ function run() {
 	fi
     }
 
+	function set_talisman_env_variables_properly() {
+		FILE_PATH="$1"
+		if [ -f $FILE_PATH ] && grep -q "TALISMAN_HOME" $FILE_PATH; then
+			if ! grep -q ">>> talisman >>>" $FILE_PATH; then
+				sed -i '' '/TALISMAN_HOME/d' $FILE_PATH
+				echo "# >>> talisman >>>" >> $FILE_PATH
+				echo "# Kindly don't touch these environment variables" >> $FILE_PATH
+      			echo "export TALISMAN_HOME=${TALISMAN_SETUP_DIR}" >> $FILE_PATH
+	  			echo "alias talisman=\$TALISMAN_HOME/${TALISMAN_BINARY_NAME}" >> $FILE_PATH
+	  			echo "# <<< talisman <<<" >> $FILE_PATH
+			fi
+		fi
+	}
+
     function add_talisman_home_as() {
     # set TALISMAN_HOME path for user if user opts for it
     #   user has option to set TALISMAN_HOME in .bashrc or .profile
@@ -225,10 +239,11 @@ function run() {
 	
     if [ -n "${TALISMAN_HOME:-}" ]; then
         echo -e "TALISMAN_HOME is already set\n"
+		set_talisman_env_variables_properly ~/.bashrc
+		set_talisman_env_variables_properly ~/.bash_profile
+		set_talisman_env_variables_properly ~/.profile
         return 0
     fi
-	
-	# [[ ! -z "${TALISMAN_HOME}" ]] || { echo -e "TALISMAN_HOME is already set\n"; return 0; }
 
     BASHRC_OPT="Set TALISMAN_HOME in ~/.bashrc"
     BASHPROFILE_OPT="Set TALISMAN_HOME in ~/.bash_profile"
@@ -266,6 +281,7 @@ function run() {
       ENV_FILE="$1"
       echo -e "Setting up TALISMAN_HOME in ${ENV_FILE}"
 	  echo "# >>> talisman >>>" >> ${ENV_FILE}
+	  echo "# Kindly don't touch these environment variables" >> ${ENV_FILE}
       echo "export TALISMAN_HOME=${TALISMAN_SETUP_DIR}" >> ${ENV_FILE}
 	  echo "alias talisman=\$TALISMAN_HOME/${TALISMAN_BINARY_NAME}" >> ${ENV_FILE}
 	  echo "# <<< talisman <<<" >> ${ENV_FILE}
@@ -273,7 +289,6 @@ function run() {
       echo
       read -n 1 -s -r -p "Press any key to continue ..."
       echo
-	  source $ENV_FILE
     }
 
     function setup_git_talisman_hooks_at() {
