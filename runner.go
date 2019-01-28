@@ -34,13 +34,13 @@ func (r *Runner) RunWithoutErrors() int {
 }
 
 //RunChecksumCalculator runs the checksum calculator against the patterns given as input
-func (r *Runner) RunChecksumCalculator(fileNamePatterns []string) int {
+func (r *Runner) RunChecksumCalculator(fileNamePatterns []string) (string, int) {
 	checksumCalculator := detector.NewChecksumCalculator()
 	rcSuggestion := checksumCalculator.SuggestTalismanRCForPatterns(fileNamePatterns)
 	if rcSuggestion != "" {
-		fmt.Print(rcSuggestion)
+		return rcSuggestion, 0
 	}
-	return 0
+	return "", 1
 }
 
 func (r *Runner) doRun() {

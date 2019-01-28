@@ -179,6 +179,21 @@ func TestPatternFindsSecretInNestedFile(t *testing.T) {
 	})
 }
 
+func TestTalismanChecksumFlag(t *testing.T) {
+	withNewTmpGitRepo(func(git *git_testing.GitTesting) {
+		_options := options{
+			debug:    false,
+			checksum: "*.txt",
+		}
+		git.SetupBaselineFiles("simple-file")
+		git.CreateFileWithContents("some-dir/some-file.txt", "test")
+		git.CreateFileWithContents("some-file.txt", "test")
+		git.Add("*")
+
+		assert.Equal(t, 0, runTalismanWithOptions(git, _options), "Expected run() to return 1 and fail as nested pem file was present in the repo")
+	})
+}
+
 func runTalisman(git *git_testing.GitTesting) int {
 	_options := options{
 		debug:   false,

@@ -6,8 +6,8 @@ import (
 	"io/ioutil"
 )
 
-//CalculateCollectiveChecksum returns collective hash of the paths passed as argument
-func CalculateCollectiveChecksum(paths []string) string {
+//CalculateCollectiveSHA256ForPaths returns collective hash of the paths passed as argument
+func CalculateCollectiveSHA256ForPaths(paths []string) string {
 	var finHash = ""
 	for _, path := range paths {
 		sbyte := []byte(finHash)

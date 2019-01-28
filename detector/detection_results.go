@@ -100,7 +100,7 @@ func (r *DetectionResults) Report() string {
 func (r *DetectionResults) suggestTalismanRC(filePaths []string) string {
 	var fileIgnoreConfigs []FileIgnoreConfig
 	for _, filePath := range filePaths {
-		currentChecksum := utilities.CalculateCollectiveChecksum([]string{filePath})
+		currentChecksum := utilities.CalculateCollectiveSHA256ForPaths([]string{filePath})
 		fileIgnoreConfig := FileIgnoreConfig{filePath, currentChecksum, []string{}}
 		fileIgnoreConfigs = append(fileIgnoreConfigs, fileIgnoreConfig)
 	}

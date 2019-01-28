@@ -26,7 +26,7 @@ func (cc *ChecksumCalculator) FilterIgnoresBasedOnChecksums(additions []git_repo
 	gitTrackedFilesAsAdditions := repo.TrackedFilesAsAdditions()
 	gitTrackedFilesAsAdditions = append(gitTrackedFilesAsAdditions, additions...)
 	for _, ignore := range ignoreConfig.FileIgnoreConfig {
-		currentCollectiveChecksum := cc.calculateCollectiveChecksumForIgnore(ignore.FileName, gitTrackedFilesAsAdditions)
+		currentCollectiveChecksum := cc.calculateCollectiveChecksumForPattern(ignore.FileName, gitTrackedFilesAsAdditions)
 		// Compare with previous checksum from FileIgnoreConfig
 		if ignore.Checksum == currentCollectiveChecksum {
 			finalIgnores = append(finalIgnores, ignore)
@@ -45,23 +45,22 @@ func (cc *ChecksumCalculator) SuggestTalismanRCForPatterns(fileNamePatterns []st
 	gitTrackedFilesAsAdditions = append(gitTrackedFilesAsAdditions, repo.StagedAdditions()...)
 	var fileIgnoreConfigs []FileIgnoreConfig
 	for _, pattern := range fileNamePatterns {
-		collectiveChecksum := cc.calculateCollectiveChecksumForIgnore(pattern, gitTrackedFilesAsAdditions)
-		if collectiveChecksum == "" {
-			continue
+		collectiveChecksum := cc.calculateCollectiveChecksumForPattern(pattern, gitTrackedFilesAsAdditions)
+		if collectiveChecksum != "" {
+			fileIgnoreConfig := FileIgnoreConfig{pattern, collectiveChecksum, []string{}}
+			fileIgnoreConfigs = append(fileIgnoreConfigs, fileIgnoreConfig)
 		}
-		fileIgnoreConfig := FileIgnoreConfig{pattern, collectiveChecksum, []string{}}
-		fileIgnoreConfigs = append(fileIgnoreConfigs, fileIgnoreConfig)
 	}
 	if len(fileIgnoreConfigs) == 0 {
 		return ""
 	}
-	result := fmt.Sprintf("\n\x1b[33mFormat for .talismanrc for given file names:\x1b[0m\n")
+	result := fmt.Sprintf("\n\x1b[33mFormat for .talismanrc for given file names\x1b[0m\n")
 	talismanRcIgnoreConfig := TalismanRCIgnore{fileIgnoreConfigs}
 	m, _ := yaml.Marshal(&talismanRcIgnoreConfig)
 	return result + string(m)
 }
 
-func (cc *ChecksumCalculator) calculateCollectiveChecksumForIgnore(fileNamePattern string, additions []git_repo.Addition) string {
+func (cc *ChecksumCalculator) calculateCollectiveChecksumForPattern(fileNamePattern string, additions []git_repo.Addition) string {
 	var patternpaths []string
 	for _, addition := range additions {
 		if addition.Matches(fileNamePattern) {
@@ -73,6 +72,6 @@ func (cc *ChecksumCalculator) calculateCollectiveChecksumForIgnore(fileNamePatte
 	if len(patternpaths) == 0 {
 		return ""
 	}
-	currentCollectiveChecksum := utilities.CalculateCollectiveChecksum(patternpaths)
+	currentCollectiveChecksum := utilities.CalculateCollectiveSHA256ForPaths(patternpaths)
 	return currentCollectiveChecksum
 }

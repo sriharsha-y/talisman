@@ -84,7 +84,8 @@ func run(stdin io.Reader, _options options) (returnCode int) {
 	var additions []git_repo.Addition
 	if _options.checksum != "" {
 		log.Infof("Running %s patterns against checksum calculator", _options.checksum)
-		status := NewRunner(make([]git_repo.Addition, 0)).RunChecksumCalculator(strings.Fields(_options.checksum))
+		message, status := NewRunner(make([]git_repo.Addition, 0)).RunChecksumCalculator(strings.Fields(_options.checksum))
+		fmt.Print(message)
 		return status
 	} else if _options.pattern != "" {
 		log.Infof("Running %s pattern", _options.pattern)
