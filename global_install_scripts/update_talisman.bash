@@ -56,25 +56,18 @@ function run() {
 		echo_debug "Running set_talisman_binary_name"
 		declare ARCHITECTURE
 		OS=$(uname -s)
-		case $OS in
-		"Linux")
+		if [ "$OS" == "Linux" ]; then
 			ARCHITECTURE="linux"
-			;;
-		"Darwin")
+		elif [ "$OS" == "Darwin" ]; then
 			ARCHITECTURE="darwin"
-			;;
-		"MINGW32_NT-10.0-WOW")
+		elif [[ "$OS" == *"MINGW32_NT"* ]] || [[ "$OS" == *"MINGW64_NT"* ]]; then
 			ARCHITECTURE="windows"
-			;;
-		"MINGW64_NT-10.0")
-			ARCHITECTURE="windows"
-			;;
-		*)
+		else
+
 			echo_error "Talisman currently only supports Windows, Linux and MacOS(darwin) systems."
 			echo_error "If this is a problem for you, please open an issue: https://github.com/${INSTALL_ORG_REPO}/issues/new"
 			exit $E_UNSUPPORTED_ARCH
-			;;
-		esac
+		fi
 
 		ARCH=$(uname -m)
 		case $ARCH in
@@ -92,7 +85,7 @@ function run() {
 		esac
 
 		TALISMAN_BINARY_NAME="talisman_${ARCHITECTURE}"
-		if [[ "$OS" == "MINGW32_NT-10.0-WOW" || "$OS" == "MINGW64_NT-10.0" ]]; then
+		if [[ "$OS" == *"MINGW32_NT"* ]] || [[ "$OS" == *"MINGW64_NT"* ]]; then
 			TALISMAN_BINARY_NAME="${TALISMAN_BINARY_NAME}.exe"
 		fi
 	}

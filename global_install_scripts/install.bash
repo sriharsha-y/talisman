@@ -35,13 +35,13 @@ function run() {
 
 	IFS=$'\n'
 	VERSION=${VERSION:-'latest'}
-	INSTALL_ORG_REPO=${INSTALL_ORG_REPO:-'thoughtworks/talisman'}
+	INSTALL_ORG_REPO=${INSTALL_ORG_REPO:-'sriharsha-y/talisman'}
 
 	DEFAULT_GLOBAL_TEMPLATE_DIR="$HOME/.git-template" # create git-template dir here if not already setup
 	TALISMAN_SETUP_DIR=${HOME}/.talisman/bin          # location of central install: talisman binary and hook script
 	TALISMAN_HOOK_SCRIPT_PATH=${TALISMAN_SETUP_DIR}/talisman_hook_script
 	SCRIPT_ORG_REPO=${SCRIPT_ORG_REPO:-$INSTALL_ORG_REPO}
-	SCRIPT_BASE="https://raw.githubusercontent.com/${SCRIPT_ORG_REPO}/master/global_install_scripts"
+	SCRIPT_BASE="https://raw.githubusercontent.com/${SCRIPT_ORG_REPO}/windows_support/global_install_scripts"
 
 	TEMP_DIR=$(mktemp -d 2>/dev/null || mktemp -d -t 'talisman_setup')
 	trap "rm -r ${TEMP_DIR}" EXIT
@@ -82,25 +82,17 @@ function run() {
 		# based on OS (linux/darwin) and ARCH(32/64 bit)
 		declare ARCHITECTURE
 		OS=$(uname -s)
-		case $OS in
-		"Linux")
+		if [ "$OS" == "Linux" ]; then
 			ARCHITECTURE="linux"
-			;;
-		"Darwin")
+		elif [ "$OS" == "Darwin" ]; then
 			ARCHITECTURE="darwin"
-			;;
-		"MINGW32_NT-10.0-WOW")
+		elif [[ "$OS" == *"MINGW32_NT"* ]] || [[ "$OS" == *"MINGW64_NT"* ]]; then
 			ARCHITECTURE="windows"
-			;;
-		"MINGW64_NT-10.0")
-			ARCHITECTURE="windows"
-			;;
-		*)
+		else
 			echo_error "Talisman currently only supports Windows, Linux and MacOS(darwin) systems."
 			echo_error "If this is a problem for you, please open an issue: https://github.com/${INSTALL_ORG_REPO}/issues/new"
 			exit $E_UNSUPPORTED_ARCH
-			;;
-		esac
+		fi
 
 		ARCH=$(uname -m)
 		case $ARCH in
@@ -118,7 +110,7 @@ function run() {
 		esac
 
 		TALISMAN_BINARY_NAME="talisman_${ARCHITECTURE}"
-		if [[ "$OS" == "MINGW32_NT-10.0-WOW" || "$OS" == "MINGW64_NT-10.0" ]]; then
+		if [[ "$OS" == *"MINGW32_NT"* ]] || [[ "$OS" == *"MINGW64_NT"* ]]; then
 			TALISMAN_BINARY_NAME="${TALISMAN_BINARY_NAME}.exe"
 		fi
 	}
@@ -209,16 +201,13 @@ function run() {
 			echo "Setting up template ${HOOK_SCRIPT} hook"
 
 			OS=$(uname -s)
-			case $OS in
-			"MINGW32_NT-10.0-WOW" | "MINGW64_NT-10.0")
+			if [[ "$OS" == *"MINGW32_NT"* ]] || [[ "$OS" == *"MINGW64_NT"* ]]; then
 				TEMPLATE_DIR_WIN=$(sed -e 's/\/\([a-z]\)\//\1:\\/' -e 's/\//\\/g' <<<"$TEMPLATE_DIR")
 				TALISMAN_HOOK_SCRIPT_PATH_WIN=$(sed -e 's/\/\([a-z]\)\//\1:\\/' -e 's/\//\\/g' <<<"$TALISMAN_HOOK_SCRIPT_PATH")
 				cmd <<<"mklink "$TEMPLATE_DIR_WIN\\hooks\\$HOOK_SCRIPT"  "$TALISMAN_HOOK_SCRIPT_PATH_WIN"" >/dev/null
-				;;
-			*)
+			else
 				ln -svf ${TALISMAN_HOOK_SCRIPT_PATH} ${TEMPLATE_DIR}/hooks/${HOOK_SCRIPT}
-				;;
-			esac
+			fi
 			echo_success "Talisman template hook successfully installed."
 		fi
 	}
@@ -329,7 +318,7 @@ function run() {
 
 		OS=$(uname -s)
 		if [ ${NUMBER_OF_EXCEPTION_REPOS} -gt 0 ]; then
-			if [[ "$OS" == "MINGW32_NT-10.0-WOW" || "$OS" == "MINGW64_NT-10.0" ]]; then
+			if [[ "$OS" == *"MINGW32_NT"* ]] || [[ "$OS" == *"MINGW64_NT"* ]]; then
 
 				EXCEPTIONS_FILE_HOME_PATH="${HOME}/talisman_missed_repositories.paths"
 				mv ${EXCEPTIONS_FILE} ${EXCEPTIONS_FILE_HOME_PATH}
