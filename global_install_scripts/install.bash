@@ -204,7 +204,7 @@ function run() {
 			if [[ "$OS" == *"MINGW32_NT"* ]] || [[ "$OS" == *"MINGW64_NT"* ]]; then
 				TEMPLATE_DIR_WIN=$(sed -e 's/\/\([a-z]\)\//\1:\\/' -e 's/\//\\/g' <<<"$TEMPLATE_DIR")
 				TALISMAN_HOOK_SCRIPT_PATH_WIN=$(sed -e 's/\/\([a-z]\)\//\1:\\/' -e 's/\//\\/g' <<<"$TALISMAN_HOOK_SCRIPT_PATH")
-				cmd <<<"mklink "$TEMPLATE_DIR_WIN\\hooks\\$HOOK_SCRIPT"  "$TALISMAN_HOOK_SCRIPT_PATH_WIN"" >/dev/null
+				cmd <<<"mklink /H "$TEMPLATE_DIR_WIN\\hooks\\$HOOK_SCRIPT"  "$TALISMAN_HOOK_SCRIPT_PATH_WIN"" >/dev/null
 			else
 				ln -svf ${TALISMAN_HOOK_SCRIPT_PATH} ${TEMPLATE_DIR}/hooks/${HOOK_SCRIPT}
 			fi
@@ -264,7 +264,7 @@ function run() {
 				break
 				;;
 			${SELFSETUP_OPT})
-				echo "You chose to set TALISMAN_HOME and binary path by yourself. Remember to set TALISMAN_HOME=${TALISMAN_SETUP_DIR} and alias talisman =${TALISMAN_SETUP_DIR}/${TALISMAN_BINARY_NAME}\n\n"
+				echo "You chose to set TALISMAN_HOME and binary path by yourself. Remember to set TALISMAN_HOME=${TALISMAN_SETUP_DIR} and alias talisman=${TALISMAN_SETUP_DIR}/${TALISMAN_BINARY_NAME}\n\n"
 				break
 				;;
 			*) echo "invalid option $REPLY" ;;
